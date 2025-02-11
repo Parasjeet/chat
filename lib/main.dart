@@ -1,4 +1,6 @@
-import 'package:chat/Screens/splash.dart';
+import 'package:chat/Screens/chat.dart';
+import 'package:chat/Screens/homepage.dart';
+import 'package:chat/Screens/phone_login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,12 +14,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Chat App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
-      home:Splash()
+      routes: {
+        '/': (context) => PhoneLogin(),
+        'HomePage': (context) => Homepage(),
+        'Chat': (context) => Chat(),
+      }
     );
   }
 }
