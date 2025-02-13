@@ -19,8 +19,13 @@ class _HomepageState extends State<Homepage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10),
-            child: CircleAvatar(
-              backgroundImage: Image(image:AssetImage('assets/images/user.png'),).image,
+            child: GestureDetector(
+              onTap: (){
+                Navigator.pushNamed(context, 'Profile');
+              },
+              child: CircleAvatar(
+                backgroundImage: Image(image:AssetImage('assets/images/user.png'),).image,
+              ),
             ),
           )
         ],
@@ -62,7 +67,9 @@ class _HomepageState extends State<Homepage> {
           ),
         );
       },),
-      floatingActionButton: FloatingActionButton(onPressed: (){},child: Icon(Icons.chat),),
+      floatingActionButton: FloatingActionButton(onPressed: (){
+        Navigator.pushNamed(context, 'SearchUser');
+      },child: Icon(Icons.chat),),
     );
   }
 }

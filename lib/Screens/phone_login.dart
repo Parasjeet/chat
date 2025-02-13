@@ -1,4 +1,5 @@
 import 'package:chat/Screens/homepage.dart';
+import 'package:chat/controllers/appwrite_controllers.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -19,8 +20,21 @@ class _PhoneLoginState extends State<PhoneLogin> {
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _otpController = TextEditingController();
 
-  String _countryCode = "+91"; // Default country code
+  String countryCode = "+91"; // Default country code
 
+  void  handleOtpSubmit(String userId,BuildContext context){
+    if(_formKey2.currentState!.validate()){
+      loginWithOtp(otp: _otpController.text, userId: userId).then((value){
+        if(value){
+          Navigator.pushNamedAndRemoveUntil(context, "HomePage", (route) => false,);
+        }
+        else{
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed')));
+        }
+      });
+    }
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,9 +84,9 @@ class _PhoneLoginState extends State<PhoneLogin> {
                           prefixIcon: CountryCodePicker(
                             onChanged: (value) {
                               setState(() {
-                                _countryCode = value.dialCode!;
+                                countryCode = value.dialCode!;
                               });
-                              print('Selected Country Code: $_countryCode');
+                              print('Selected Country Code: $countryCode');
                             },
                             initialSelection: "IN",
                           ),
@@ -89,63 +103,71 @@ class _PhoneLoginState extends State<PhoneLogin> {
                       height: 50,
                       width: double.infinity,
                       child: ElevatedButton(
+                        child: Text('Send OTP'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: KprimaryColor,
                           foregroundColor: Colors.white,
                         ),
                         onPressed: () {
                           if (_formKey1.currentState!.validate()) {
-                            // Show OTP Dialog
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  backgroundColor: Colors.white,
-                                  title: Text('OTP Verification'),
-                                  content: Form(
-                                    key: _formKey2, // Assign to Form widget
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('Enter 6-digit OTP'),
-                                        SizedBox(height: 10),
-                                        TextFormField(
-                                          validator: (value) {
-                                            if (value == null || value.length != 6) {
-                                              return "Invalid OTP";
-                                            }
-                                            return null;
-                                          },
-                                          keyboardType: TextInputType.number,
-                                          controller: _otpController,
-                                          decoration: InputDecoration(
-                                            hintText: 'Enter the OTP received',
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                              borderSide: BorderSide(color: Colors.black),
+                            createPhoneSession(phone: countryCode+_phoneController.text.trim()).then((value) {
+                              if(value!= "login_error"){
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      backgroundColor: Colors.white,
+                                      title: Text('OTP Verification'),
+                                      content: Form(
+                                        key: _formKey2, // Assign to Form widget
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('Enter 6-digit OTP'),
+                                            SizedBox(height: 10),
+                                            TextFormField(
+                                              validator: (value) {
+                                                if (value == null || value.length != 6) {
+                                                  return "Invalid OTP";
+                                                }
+                                                return null;
+                                              },
+                                              keyboardType: TextInputType.number,
+                                              controller: _otpController,
+                                              decoration: InputDecoration(
+                                                hintText: 'Enter the OTP received',
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                  borderSide: BorderSide(color: Colors.black),
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                          ],
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            if (_formKey2.currentState!.validate()) {
+                                             handleOtpSubmit(value, context);
+                                            }
+                                          },
+                                          child: Text('Submit'),
                                         ),
                                       ],
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        if (_formKey2.currentState!.validate()) {
-                                          Navigator.pushNamed(context, 'HomePage');
-                                        }
-                                      },
-                                      child: Text('Submit'),
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 );
-                              },
-                            );
+                              }
+                              else{
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to send otp')));
+                              }
+                            });
+                            // Show OTP Dialog
                           }
                         },
-                        child: Text('Send OTP'),
+
                       ),
                     ),
                   ],
