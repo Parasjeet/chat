@@ -1,7 +1,9 @@
 import 'package:chat/Screens/homepage.dart';
 import 'package:chat/controllers/appwrite_controllers.dart';
+import 'package:chat/providers/user_data_provider.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/color.dart';
 
@@ -26,7 +28,10 @@ class _PhoneLoginState extends State<PhoneLogin> {
     if(_formKey2.currentState!.validate()){
       loginWithOtp(otp: _otpController.text, userId: userId).then((value){
         if(value){
-          Navigator.pushNamedAndRemoveUntil(context, "HomePage", (route) => false,);
+          Provider.of<UserDataProvider>(context,listen: false).setUserId(userId);
+          Provider.of<UserDataProvider>(context,listen: false).setUserPhone(countryCode+ _phoneController.text);
+
+          Navigator.pushNamedAndRemoveUntil(context, "UpdateProfile", (route) => false,arguments: {"title":"add"});
         }
         else{
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Login failed')));
